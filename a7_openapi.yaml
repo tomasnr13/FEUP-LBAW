@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: Twira
+  version: "1.0"
+tags:
+  - name: account
+    description: Account management and login/logout
+  - name: post
+    description: Posts
+  - name: profile
+    description: User profiles
+  - name: timeline
+    description: Timeline
+paths:
+  /account/login:
+    get:
+      operationId: loginPage
+      summary: 'Login page'
+      tags:
+        - account
+      responses:
+        '200':
+          description: 'Login page'
+    post:
+      operationId: login
+      summary: 'Logs user into the system'
+      tags:
+        - account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+        '403':
+          description: Invalid email or password
+  /account/logout:
+    get:
+      operationId: logout
+      summary: Logs out the currently logged in user
+      tags:
+        - account
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Not logged in
+  /account/register:
+    get:
+      operationId: registerPage
+      summary: 'Register page'
+      tags:
+        - account
+      responses:
+        '200':
+          description: 'Register page'
+    post:
+      tags:
+        - account
+      summary: Create user
+      operationId: register
+      requestBody:
+        description: Account details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '200':
+          description: Account creation successful
+        '400':
+          description: Invalid account information
+        '403':
+          description: Account already exists
+  /account/password/recover:
+    get:
+      operationId: passwordRecoveryPage
+      summary: 'Password recovery page'
+      tags:
+        - account
+      responses:
+        '200':
+          description: 'Password recovery page'
+    post:
+      operationId: passwordRecovery
+      summary: 'Creates a password recovery request'
+      tags:
+        - account
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: string
+              format: email
+              example: example@email.com
+      responses:
+        '200':
+          description: 'Request successful'
+        '404':
+          description: 'Request failed, as no account has that email'
+
+  /profile:
+    get:
+      operationId: selfProfilePage
+      summary: Shows the logged in user's profile page
+      tags:
+        - profile
+      responses:
+        '200':
+          description: Profile page
+        '401':
+          description: Not logged in
+    patch:
+      operationId: editProfile
+      summary: Edits a user's profile
+      tags:
+        - profile
+      requestBody:
+        description: Profile information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditProfile'
+      responses:
+        '200':
+          description: Operation successful
+        '401':
+          description: Not logged in
+  /profile/{id}:
+    get:
+      operationId: profilePage
+      summary: Shows the profile page of the specified user
+      tags:
+        - profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Profile page
+        '403':
+          description: Not allowed to view this profile
+        '404':
+          description: User not found
+  /profile/edit:
+    get:
+      operationId: editProfilePage
+      summary: Shows the edit profile page
+      tags:
+        - profile
+      responses:
+        '200':
+          description: Profile edit page
+        '401':
+          description: Not logged in
+  /profile/browse:
+    get:
+      operationId: browseProfilesPage
+      summary: Shows a list of public user profiles
+      tags:
+        - profile
+      responses:
+        '200':
+          description: Profiles page
+  /profile/search:
+    get:
+      operationId: searchProfilesPage
+      summary: Shows the results of a search for a user profile
+      tags:
+        - profile
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: The query to use to search users
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results page
+
+  /media/upload:
+    post:
+      operationId: uploadMedia
+      summary: Upload a media file to be used in a post
+      tags:
+        - post
+      requestBody:
+        description: Post contents
+        content:
+          image/jpeg:
+            schema:
+              $ref: '#/components/schemas/File'
+          image/png:
+            schema:
+              $ref: '#/components/schemas/File'
+          image/gif:
+            schema:
+              $ref: '#/components/schemas/File'
+          image/webp:
+            schema:
+              $ref: '#/components/schemas/File'
+          image/avif:
+            schema:
+              $ref: '#/components/schemas/File'
+          image/jxl:
+            schema:
+              $ref: '#/components/schemas/File'
+          video/mp4:
+            schema:
+              $ref: '#/components/schemas/File'
+          video/webm:
+            schema:
+              $ref: '#/components/schemas/File'
+      responses:
+        '200':
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                type: string
+                format: url
+                description: The URL of the uploaded resource
+        '401':
+          description: Not logged in
+  /post/create:
+    post:
+      operationId: createPost
+      summary: Creates a post
+      tags:
+        - post
+      requestBody:
+        description: Post contents
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      responses:
+        '200':
+          description: Operation successful
+        '401':
+          description: Not logged in
+    get:
+      operationId: createPostPage
+      summary: Shows the create post page
+      tags:
+        - post
+      responses:
+        '200':
+          description: Post creation page
+        '401':
+          description: Not logged in
+  /post/{id}:
+    get:
+      operationId: viewPostPage
+      summary: Shows the specified post
+      tags:
+        - post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the post
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post page
+        '403':
+          description: Not allowed to view this post
+        '404':
+          description: Post not found
+    patch:
+      operationId: editPost
+      summary: Edits the specified post
+      tags:
+        - post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the post
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Post edit
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditPost'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditPost'
+      responses:
+        '200':
+          description: Operation successful
+        '403':
+          description: Not allowed to edit this post
+        '404':
+          description: Post not found
+    delete:
+      operationId: deletePost
+      summary: Deletes the specified post
+      tags:
+        - post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the post
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Operation successful
+        '403':
+          description: Not allowed to delete this post
+        '404':
+          description: Post not found
+
+  /:
+    get:
+      operationId: timelinePage
+      summary: Shows the user's timeline
+      tags:
+        - timeline
+      responses:
+        '200':
+          description: Timeline page
+
+components:
+  schemas:
+    File:
+      type: string
+      format: binary
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: example@email.com
+        password:
+          type: string
+          example: hunter2
+
+    CreateUser:
+      type: object
+      properties:
+        username:
+          type: string
+          example: username
+        email:
+          type: string
+          example: example@email.com
+        password:
+          type: string
+          example: hunter2
+        birthDate:
+          type: string
+          format: date
+          example: '1970-01-01'
+        publicProfile:
+          type: boolean
+          example: true
+        admin:
+          type: boolean
+          example: false
+
+    CreatePost:
+      type: object
+      properties:
+        text:
+          type: string
+          description: The text of the post (optional if it's a video or image post)
+        contentUrl:
+          type: string
+          format: url
+          description: The URL of the media content (must not be included on text posts)
+
+    EditPost:
+      type: object
+      properties:
+        text:
+          type: string
+          description: The text of the post (optional if it's a video or image post)
+
+    EditProfile:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          format: date
+          example: '1970-01-01'
+        phone:
+          type: string
+          example: '12345'
+        bio:
+          type: string
+          example: 'This is some information about the user'
+        publicProfile:
+          type: boolean
+          example: true
